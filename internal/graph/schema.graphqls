@@ -1,0 +1,183 @@
+# ── Scalars ──────────────────────────────────────────────────────────────────
+
+# Time is serialized as ISO 8601 string: "2024-03-15T10:30:00Z"
+scalar Time
+
+# JSON is serialized as a raw JSON object/array
+scalar Map
+
+# ── Core Types ───────────────────────────────────────────────────────────────
+
+type Topic {
+  id: ID!
+  name: String!
+  description: String
+  partitions: Int!
+  replicationFactor: Int!
+  createdAt: Time!
+  # Live metrics — fetched from Kafka Admin on demand
+  latestOffsets: [PartitionOffset!]
+}
+
+type PartitionOffset {
+  partition: Int!
+  offset: Int!
+}
+
+type Schema {
+  id: ID!
+  topicName: String!
+  version: Int!
+  schemaJson: Map!
+  isActive: Boolean!
+  createdAt: Time!
+}
+
+# ── Dead Letter Queue ─────────────────────────────────────────────────────────
+
+type DLQEvent {
+  id: ID!
+  topicName: String!
+  partitionId: Int!
+  kafkaOffset: Int!
+  # payload returned as a JSON map so the UI can render it as a tree
+  payload: Map!
+  errorType: String!
+  errorMessage: String!
+  retryCount: Int!
+  status: String!
+  producerId: String
+  createdAt: Time!
+  updatedAt: Time!
+  lastRetryAt: Time
+}
+
+type DLQStats {
+  pending: Int!
+  retrying: Int!
+  retried: Int!
+  discarded: Int!
+  total: Int!
+}
+
+type RetryResult {
+  success: Boolean!
+  eventId: ID!
+  message: String!
+}
+
+# ── Lag Tracking ──────────────────────────────────────────────────────────────
+
+# LagUpdate is what the subscription pushes to the dashboard
+# every time the tracker polls Kafka.
+type LagUpdate {
+  topic: String!
+  consumerGroup: String!
+  totalLag: Int!
+  partitions: [PartitionLag!]!
+  timestamp: Time!
+  isAlert: Boolean!
+}
+
+type PartitionLag {
+  topic: String!
+  partition: Int!
+  consumerGroup: String!
+  latestOffset: Int!
+  committedOffset: Int!
+  lag: Int!
+}
+
+# LagPoint is a single reading in the historical time-series.
+# Used to populate the chart on dashboard load.
+type LagPoint {
+  timestamp: Time!
+  lag: Int!
+}
+
+# ── Pipeline Topology ─────────────────────────────────────────────────────────
+
+# TopologyGraph is the full directed graph shown in the D3 visualizer.
+type TopologyGraph {
+  nodes: [TopologyNode!]!
+  edges: [TopologyEdge!]!
+}
+
+type TopologyNode {
+  id: String!
+  # type: "producer" | "topic" | "consumer_group"
+  type: String!
+  label: String!
+  # metadata varies by node type — topic has partitions, consumer has lag
+  metadata: Map
+}
+
+type TopologyEdge {
+  source: String!
+  target: String!
+  # eventRate: approximate events/sec flowing across this edge
+  eventRate: Float
+}
+
+# ── Queries ───────────────────────────────────────────────────────────────────
+
+type Query {
+  # Topics
+  topics: [Topic!]!
+  topic(name: String!): Topic
+
+  # Schema Registry
+  activeSchema(topicName: String!): Schema
+  schemaHistory(topicName: String!): [Schema!]!
+
+  # Dead Letter Queue
+  dlqEvents(
+    topicName: String
+    status: String
+    limit: Int
+    offset: Int
+  ): [DLQEvent!]!
+
+  dlqEvent(id: ID!): DLQEvent
+
+  dlqStats(topicName: String): DLQStats!
+
+  # Lag history for a chart on dashboard load
+  # duration: how far back to fetch, e.g. "30m", "1h", "24h"
+  lagHistory(
+    topic: String!
+    consumerGroup: String!
+    durationMinutes: Int!
+  ): [LagPoint!]!
+
+  # Latest lag value for summary cards
+  latestLag(topic: String!, consumerGroup: String!): Int!
+
+  # Full pipeline topology for the D3 graph
+  topology: TopologyGraph!
+
+  # Health check
+  health: Boolean!
+}
+
+# ── Mutations ─────────────────────────────────────────────────────────────────
+
+type Mutation {
+  # Schema Registry
+  registerSchema(topicName: String!, schemaJson: Map!): Schema!
+
+  # Dead Letter Queue
+  retryEvent(id: ID!): RetryResult!
+  retryBatch(ids: [ID!]!): [RetryResult!]!
+  discardEvent(id: ID!): Boolean!
+  discardBatch(ids: [ID!]!): Boolean!
+}
+
+# ── Subscriptions ─────────────────────────────────────────────────────────────
+
+type Subscription {
+  # Streams lag updates for ALL topics every poll interval.
+  # The dashboard filters by topic client-side.
+  # One subscription serves all charts simultaneously.
+  lagUpdates: LagUpdate!
+}
