@@ -15,12 +15,12 @@ import (
 // Kafka parallelism is partition-based — a slow partition in an
 // otherwise healthy consumer group is a common failure mode.
 type PartitionLag struct {
-	Topic          string
-	Partition      int
-	ConsumerGroup  string
-	LatestOffset   int64 // how far the producer has written
+	Topic           string
+	Partition       int
+	ConsumerGroup   string
+	LatestOffset    int64 // how far the producer has written
 	CommittedOffset int64 // how far the consumer has confirmed
-	Lag            int64 // LatestOffset - CommittedOffset
+	Lag             int64 // LatestOffset - CommittedOffset
 }
 
 // TopicInfo holds metadata about a Kafka topic fetched from the broker.
@@ -109,9 +109,10 @@ func (a *AdminClient) GetTopicMetadata(ctx context.Context) ([]TopicInfo, error)
 // We use this as the "producer position" in the lag calculation.
 //
 // Implementation:
-//   We open a temporary reader positioned at LastOffset for each partition,
-//   then read its current offset. No messages are consumed — we just
-//   inspect the offset position.
+//
+//	We open a temporary reader positioned at LastOffset for each partition,
+//	then read its current offset. No messages are consumed — we just
+//	inspect the offset position.
 func (a *AdminClient) GetLatestOffsets(ctx context.Context, topic string) (map[int]int64, error) {
 	conn, err := a.dial(ctx)
 	if err != nil {
@@ -191,10 +192,10 @@ func (a *AdminClient) GetConsumerGroupOffsets(
 		// with the consumer group ID. The reader's Offset() method
 		// returns the last committed offset for this partition.
 		reader := kafkago.NewReader(kafkago.ReaderConfig{
-			Brokers:  a.brokers,
-			Topic:    topic,
+			Brokers:   a.brokers,
+			Topic:     topic,
 			Partition: p.ID,
-			GroupID:  consumerGroup,
+			GroupID:   consumerGroup,
 			// MinBytes/MaxBytes control fetch size.
 			// Small values here because we're just reading metadata.
 			MinBytes: 1,

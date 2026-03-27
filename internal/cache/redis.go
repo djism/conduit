@@ -64,14 +64,16 @@ func New(cfg *config.Config) (*Client, error) {
 // StoreLag records a consumer lag reading into a Redis Sorted Set.
 //
 // Data structure:
-//   Key:    conduit:lag:{topic}:{consumerGroup}
-//   Score:  Unix timestamp (seconds) — enables time-range queries
-//   Member: "{timestamp}:{lag}" — stores both values in the member string
+//
+//	Key:    conduit:lag:{topic}:{consumerGroup}
+//	Score:  Unix timestamp (seconds) — enables time-range queries
+//	Member: "{timestamp}:{lag}" — stores both values in the member string
 //
 // Why Sorted Sets:
-//   ZRANGEBYSCORE gives O(log n) time-range queries.
-//   "Give me all readings in the last 30 minutes" = one Redis call.
-//   A List would require O(n) scan; a Hash can't do range queries at all.
+//
+//	ZRANGEBYSCORE gives O(log n) time-range queries.
+//	"Give me all readings in the last 30 minutes" = one Redis call.
+//	A List would require O(n) scan; a Hash can't do range queries at all.
 //
 // The key has a TTL equal to LagHistoryTTLHours from config (default 24h).
 // Redis evicts the entire key after TTL — no manual cleanup needed.

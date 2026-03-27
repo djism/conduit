@@ -27,12 +27,12 @@ func (r *mutationResolver) RegisterSchema(
 	}
 
 	return &Schema{
-		ID:        schema.ID,
-		TopicName: schema.TopicName,
-		Version:   schema.Version,
+		ID:         schema.ID,
+		TopicName:  schema.TopicName,
+		Version:    schema.Version,
 		SchemaJSON: schema.SchemaJSON,
-		IsActive:  schema.IsActive,
-		CreatedAt: schema.CreatedAt,
+		IsActive:   schema.IsActive,
+		CreatedAt:  schema.CreatedAt,
 	}, nil
 }
 

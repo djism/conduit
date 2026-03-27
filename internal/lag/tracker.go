@@ -38,7 +38,7 @@ type Tracker struct {
 	admin       *kafka.AdminClient
 	cache       *cache.Client
 	subscribers map[string]chan Update // key: subscriber ID
-	mu          sync.RWMutex          // protects subscribers map
+	mu          sync.RWMutex           // protects subscribers map
 	done        chan struct{}
 }
 

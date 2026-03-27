@@ -16,6 +16,7 @@ import (
 // migrations holds all SQL files embedded at compile time.
 // This means the binary carries its own migrations —
 // no need to ship a separate migrations directory.
+//
 //go:embed migrations/*.sql
 var migrations embed.FS
 

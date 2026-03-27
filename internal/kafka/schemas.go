@@ -54,8 +54,8 @@ func NewSchemaRegistry(database *db.DB) *SchemaRegistry {
 // Register stores a new JSON Schema for a topic.
 //
 // Versioning logic:
-//  - First schema for a topic → version 1, active
-//  - Subsequent schema → version N+1, active; old version deactivated
+//   - First schema for a topic → version 1, active
+//   - Subsequent schema → version N+1, active; old version deactivated
 //
 // This means schema evolution is automatic — you register a new schema
 // and it immediately becomes the validator. Old schemas are preserved
