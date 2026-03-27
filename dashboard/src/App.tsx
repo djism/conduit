@@ -1,121 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { ApolloProvider } from "@apollo/client/react";
+import client from "./lib/apollo";
+import PipelineTopology from "./components/PipelineTopology";
+import LagDashboard from "./components/LagDashboard";
+import DeadLetterQueue from "./components/DeadLetterQueue";
 
-function App() {
-  const [count, setCount] = useState(0)
+const TOPICS = ["orders", "payments", "notifications"];
+const CONSUMER_GROUP = "conduit-server";
+const ALERT_THRESHOLD = 1000;
 
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <ApolloProvider client={client}>
+      <div className="min-h-screen bg-slate-950 text-slate-100">
+        <header className="border-b border-slate-800 px-6 py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                C
+              </div>
+              <span className="font-semibold text-lg tracking-tight">Conduit</span>
+              <span className="text-xs text-slate-500 font-mono bg-slate-800 px-2 py-0.5 rounded">
+                Event Pipeline Platform
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+              live
+            </div>
+          </div>
+        </header>
+        <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+          <PipelineTopology width={1100} height={420} />
+          <div className="space-y-4">
+            <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider">
+              Consumer Lag
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              {TOPICS.map((topic) => (
+                <LagDashboard
+                  key={topic}
+                  topic={topic}
+                  consumerGroup={CONSUMER_GROUP}
+                  alertThreshold={ALERT_THRESHOLD}
+                />
+              ))}
+            </div>
+          </div>
+          <DeadLetterQueue />
+        </main>
+      </div>
+    </ApolloProvider>
+  );
 }
-
-export default App
