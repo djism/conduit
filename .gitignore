@@ -30,3 +30,10 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+.env
+dashboard/dist/
+dashboard/node_modules/
+.DS_Store
+.vscode/
+.idea/
