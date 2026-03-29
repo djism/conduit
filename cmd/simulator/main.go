@@ -114,23 +114,23 @@ func validEvent(topic string) ([]byte, error) {
 	switch topic {
 	case "orders":
 		event = map[string]interface{}{
-			"order_id":   uuid.New().String(),
+			"order_id":    uuid.New().String(),
 			"customer_id": uuid.New().String(),
-			"amount":     randomAmount(),
-			"currency":   randomChoice([]string{"USD", "EUR", "GBP"}),
-			"status":     randomChoice([]string{"pending", "confirmed", "shipped"}),
-			"items":      randomInt(1, 10),
-			"created_at": time.Now().UTC().Format(time.RFC3339),
+			"amount":      randomAmount(),
+			"currency":    randomChoice([]string{"USD", "EUR", "GBP"}),
+			"status":      randomChoice([]string{"pending", "confirmed", "shipped"}),
+			"items":       randomInt(1, 10),
+			"created_at":  time.Now().UTC().Format(time.RFC3339),
 		}
 
 	case "payments":
 		event = map[string]interface{}{
-			"payment_id":  uuid.New().String(),
-			"order_id":    uuid.New().String(),
-			"amount":      randomAmount(),
-			"currency":    randomChoice([]string{"USD", "EUR", "GBP"}),
-			"method":      randomChoice([]string{"card", "paypal", "bank_transfer"}),
-			"status":      randomChoice([]string{"pending", "completed", "failed"}),
+			"payment_id":   uuid.New().String(),
+			"order_id":     uuid.New().String(),
+			"amount":       randomAmount(),
+			"currency":     randomChoice([]string{"USD", "EUR", "GBP"}),
+			"method":       randomChoice([]string{"card", "paypal", "bank_transfer"}),
+			"status":       randomChoice([]string{"pending", "completed", "failed"}),
 			"processed_at": time.Now().UTC().Format(time.RFC3339),
 		}
 
