@@ -1,3 +1,4 @@
+# Conduit
 ### Real-Time Event Pipeline Operations Platform
 
 <p align="center">
@@ -20,6 +21,18 @@
 ---
 
 > **Open the dashboard. Run the simulator. Watch events flow through the pipeline topology in real time — schema violations caught before they reach Kafka, consumer lag tracked per partition, failed events replayed from the DLQ with one click.**
+
+---
+
+## The Dashboard
+
+![Conduit Pipeline Topology](assets/demo_topology.png)
+
+*Live D3 force simulation — producers, topics, and consumer groups as a physics-based graph. Nodes pulse when events are actively flowing. Consumer group nodes turn red when lag exceeds the alert threshold.*
+
+![Conduit Consumer Lag](assets/demo_lag.png)
+
+*Per-topic consumer lag tracked as a time-series via Redis Sorted Sets and streamed live to the dashboard via GraphQL subscription. Red threshold line fires an alert when lag exceeds 1,000 messages. Chart populates within seconds of the simulator starting.*
 
 ---
 
@@ -228,7 +241,7 @@ conduit/
 | **Topology Graph** | D3.js force simulation | Spring physics layout for producer → topic → consumer graph. No other library supports this |
 | **Lag Charts** | Recharts | React-native SVG charts. `isAnimationActive={false}` for real-time data — no jitter |
 | **Containerization** | Docker Compose | One command runs Kafka, ZooKeeper, PostgreSQL, Redis, Prometheus |
-| **Observability** | Prometheus + Grafana | 7 metrics: event rate, schema rejection rate, DLQ depth, lag p95, replay success rate |
+| **Observability** | Prometheus | Event rate, schema rejection rate, DLQ depth, lag p95 — scraped every 15s |
 | **CI/CD** | GitHub Actions | Build + test on every push. gofmt check enforced |
 
 ---

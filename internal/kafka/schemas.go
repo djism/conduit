@@ -95,6 +95,21 @@ func (r *SchemaRegistry) Register(
 
 	// Get current max version for this topic.
 	// If no rows exist yet, version starts at 0 and we'll set it to 1.
+	// Upsert the topic record — schemas table has a NOT NULL topic_id FK.
+	// If the topic already exists this is a no-op.
+	var topicID string
+	err = tx.QueryRowContext(ctx,
+		`INSERT INTO topics (name, partitions, replication_factor)
+		 VALUES ($1, 1, 1)
+		 ON CONFLICT (name) DO UPDATE SET updated_at = NOW()
+		 RETURNING id`,
+		topicName,
+	).Scan(&topicID)
+	if err != nil {
+		return nil, fmt.Errorf("upserting topic: %w", err)
+	}
+
+	// Get current max version for this topic.
 	var currentVersion int
 	err = tx.QueryRowContext(ctx,
 		`SELECT COALESCE(MAX(version), 0) FROM schemas WHERE topic_name = $1`,
@@ -120,10 +135,10 @@ func (r *SchemaRegistry) Register(
 	schemaID := uuid.New().String()
 	var createdAt time.Time
 	err = tx.QueryRowContext(ctx,
-		`INSERT INTO schemas (id, topic_name, version, schema_json, is_active)
-		 VALUES ($1, $2, $3, $4, TRUE)
+		`INSERT INTO schemas (id, topic_id, topic_name, version, schema_json, is_active)
+		 VALUES ($1, $2, $3, $4, $5, TRUE)
 		 RETURNING created_at`,
-		schemaID, topicName, newVersion, string(schemaBytes),
+		schemaID, topicID, topicName, newVersion, string(schemaBytes),
 	).Scan(&createdAt)
 	if err != nil {
 		return nil, fmt.Errorf("inserting schema: %w", err)

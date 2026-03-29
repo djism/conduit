@@ -24,6 +24,18 @@
 
 ---
 
+## The Dashboard
+
+![Conduit Pipeline Topology](assets/demo_topology.png)
+
+*Live D3 force simulation — producers, topics, and consumer groups as a physics-based graph. Nodes pulse when events are actively flowing. Consumer group nodes turn red when lag exceeds the alert threshold.*
+
+![Conduit Consumer Lag](assets/demo_lag.png)
+
+*Per-topic consumer lag tracked as a time-series via Redis Sorted Sets and streamed live to the dashboard via GraphQL subscription. Red threshold line fires an alert when lag exceeds 1,000 messages. Chart populates within seconds of the simulator starting.*
+
+---
+
 ## Why This Exists
 
 Every team running Kafka eventually needs the same thing — visibility. Which consumers are lagging? Which events are failing validation? Where are dead letters accumulating? The standard answer is 5 terminal windows, `kafka-consumer-groups.sh`, and grep.
